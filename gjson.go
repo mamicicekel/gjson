@@ -498,6 +498,20 @@ end:
 	return
 }
 
+func skipUTF8BOM(json string, i int) int {
+	if i+2 < len(json) && json[i] == '\xef' && json[i+1] == '\xbb' && json[i+2] == '\xbf' {
+		return i + 3
+	}
+	return i
+}
+
+func skipUTF8BOMBytes(data []byte, i int) int {
+	if i+2 < len(data) && data[i] == 0xef && data[i+1] == 0xbb && data[i+2] == 0xbf {
+		return i + 3
+	}
+	return i
+}
+
 // Parse parses the json and returns a result.
 //
 // This function expects that the json is well-formed, and does not validate.
@@ -506,7 +520,7 @@ end:
 // use the Valid function first.
 func Parse(json string) Result {
 	var value Result
-	i := 0
+	i := skipUTF8BOM(json, 0)
 	for ; i < len(json); i++ {
 		if json[i] == '{' || json[i] == '[' {
 			value.Type = JSON
@@ -2518,6 +2532,7 @@ func GetManyBytes(json []byte, path ...string) []Result {
 }
 
 func validpayload(data []byte, i int) (outi int, ok bool) {
+	i = skipUTF8BOMBytes(data, i)
 	for ; i < len(data); i++ {
 		switch data[i] {
 		default:

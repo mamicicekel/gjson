@@ -1022,6 +1022,14 @@ func testvalid(t *testing.T, json string, expect bool) {
 	}
 }
 
+func TestUTF8BOM(t *testing.T) {
+	json := "\ufeff{\"a\":1}"
+	assert(t, Valid(json) == true)
+	assert(t, Parse(json).Get("a").Int() == 1)
+	assert(t, Get(json, "a").Int() == 1)
+	assert(t, ValidBytes([]byte(json)) == true)
+}
+
 func TestValidBasic(t *testing.T) {
 	testvalid(t, "0", true)
 	testvalid(t, "00", false)
